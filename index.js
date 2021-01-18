@@ -39,6 +39,7 @@ async function crawl(urlData) {
 }
 
 let dataCache = [];
+let depth = 0;
 
 async function leveledCrawler(item) {
   try {
@@ -61,6 +62,9 @@ async function run(entrypoint) {
   try {
     let data = await crawl(entrypoint);
     let isDeepCrawler = args[1] !== undefined && args[1] === 'enabled';
+    let isDepthNotUndefined = args[2] !== undefined;
+    let depthArg = isDepthNotUndefined ? parseInt(args[2], 10) : 1;
+    let isDepthLimit = depth < depthArg;
 
     for (let item of data) {
       if (dataCache.indexOf(item) === -1) {
@@ -68,10 +72,12 @@ async function run(entrypoint) {
         console.log(item);
       }
 
-      if (isDeepCrawler) {
+      if (isDeepCrawler && isDepthLimit) {
         leveledCrawler(item);
       }
     }
+
+    depth += 1;
   } catch(e) {
     return;
   }
